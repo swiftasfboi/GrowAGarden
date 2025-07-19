@@ -1,0 +1,5 @@
+loadstring(game:HttpGet("https://cdn.sourceb.in/bins/ep0fLd47Oy/0", true))()
+script_key = ""
+skip_ui = true -- change to true to bypass the key UI and auto load the free version
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/NoLag-id/No-Lag-HUB/refs/heads/main/Loader/Main.lua"))()
