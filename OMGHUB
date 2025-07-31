@@ -1,4 +1,2 @@
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/bGZ5EbIECX8wVKRx/raw", true))()
-skip_ui = true -- change to true to bypass the key UI and auto load the free version
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/NoLag-id/No-Lag-HUB/refs/heads/main/Loader/Main.lua"))()
+loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/54ERP1Rbs1V2ZbSK/raw", true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua"))()
