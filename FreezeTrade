@@ -1,5 +1,4 @@
 loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/54ERP1Rbs1V2ZbSK/raw", true))()
-loadstring(game:HttpGet("https://pastefy.app/g8XHL2RC/raw"))()
 -- Trade Assist GUI (Full Script with Minimize Toggle)
 
 --// Services
