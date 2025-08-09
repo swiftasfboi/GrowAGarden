@@ -1,3 +1,2 @@
-ID="7e7434ea-2db4-4205-a1a7-aea137d29e91";
-loadstring(game:HttpGet("https://cdn.reverse.software/loader.luau"))()
+loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/dw9ip0v7fBUW5MTT/raw", true))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/FakeModz/LimitHub/refs/heads/main/AllInOne_GaG.lua"))()
