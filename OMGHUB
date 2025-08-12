@@ -1,2 +1,3 @@
-loadstring(game:HttpGet("https://api.rubis.app/v2/scrap/54ERP1Rbs1V2ZbSK/raw", true))()
+AUTHORIZATION_KEY="$2b$10$TPQWxCrwMphJUsAE2hP/BezOG.gLn9movRPVUN6yqL7eDuqEvekWu";
+loadstring(game:HttpGet("https://cdn.reverse.software/auto-joiner.luau"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Omgshit/Scripts/main/MainLoader.lua"))()
