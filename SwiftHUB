@@ -1,2 +1,2 @@
 loadstring(game:HttpGet("https://pastefy.app/PxUh5p9d/raw"))()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/yuuhayate2/GrowAGarden1/refs/heads/main/eggrandomizer"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/swiftasfboi/KuniHub/refs/heads/main/kunilibrary"))()
