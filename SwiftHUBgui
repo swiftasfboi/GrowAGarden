@@ -1,308 +1,147 @@
--- Robust SwiftHUB (loading + toolbar) for executors
--- Paste this into your executor and run while in-game.
-
+loadstring([[
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
-print("SwiftHUB: start")
+local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Wait safely for LocalPlayer
-local player = Players.LocalPlayer
-local waitTimer = 0
-while not player and waitTimer < 15 do
-    wait(0.1)
-    waitTimer = waitTimer + 0.1
-    player = Players.LocalPlayer
-end
-if not player then
-    warn("SwiftHUB: couldn't find LocalPlayer (are you in-game?).")
-    return
-end
-print("SwiftHUB: LocalPlayer found:", player.Name)
-
-local playerGui = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui", 10)
-if not playerGui then
-    warn("SwiftHUB: PlayerGui not found.")
-    return
-end
-
--- Create ScreenGui
+-- ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "SwiftHUB"
 screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 9999
--- ignore inset so it is not pushed by topbar
-if screenGui.SetCore then
-    -- noop, compatibility
-end
 screenGui.Parent = playerGui
 
--- === Loading screen ===
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Name = "LoadingFrame"
-loadingFrame.Size = UDim2.new(0, 380, 0, 140)
-loadingFrame.Position = UDim2.new(0.5, -190, 0.5, -70)
-loadingFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
-loadingFrame.BackgroundTransparency = 0.35
-loadingFrame.BorderSizePixel = 0
-loadingFrame.Parent = screenGui
-
-local header = Instance.new("TextLabel", loadingFrame)
-header.Size = UDim2.new(1,0,0.28,0)
-header.Position = UDim2.new(0,0,0,6)
-header.BackgroundTransparency = 1
-header.Text = "SwiftHUB"
-header.Font = Enum.Font.GothamBlack
-header.TextScaled = true
-header.TextColor3 = Color3.fromRGB(0,200,255)
-
-local loadingLabel = Instance.new("TextLabel", loadingFrame)
-loadingLabel.Name = "LoadingLabel"
-loadingLabel.Size = UDim2.new(1,0,0.2,0)
-loadingLabel.Position = UDim2.new(0,0,0.38,0)
-loadingLabel.BackgroundTransparency = 1
-loadingLabel.Text = "Loading..."
-loadingLabel.Font = Enum.Font.Gotham
-loadingLabel.TextScaled = true
-loadingLabel.TextColor3 = Color3.fromRGB(255,255,255)
-
-local barFrame = Instance.new("Frame", loadingFrame)
-barFrame.Name = "BarFrame"
-barFrame.Size = UDim2.new(0.8,0,0.16,0)
-barFrame.Position = UDim2.new(0.1,0,0.72,0)
-barFrame.BackgroundColor3 = Color3.fromRGB(70,70,70)
-barFrame.BorderSizePixel = 0
-
-local barFill = Instance.new("Frame", barFrame)
-barFill.Name = "Bar"
-barFill.Size = UDim2.new(0,0,1,0)
-barFill.BackgroundColor3 = Color3.fromRGB(255,255,255)
-barFill.BorderSizePixel = 0
-
--- === Main toolbar (hidden until loading finishes) ===
-local frame = Instance.new("Frame")
-frame.Name = "ToolBar"
-frame.Size = UDim2.new(0, 240, 0, 180)
-frame.Position = UDim2.new(0.08, 0, 0.4, 0)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BackgroundTransparency = 0.2
-frame.Visible = false
+-- === Main Frame ===
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 280, 0, 180)
+frame.Position = UDim2.new(0.4,0,0.4,0)
+frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
 frame.BorderSizePixel = 0
 frame.Active = true
-frame.Parent = screenGui
+frame.Draggable = true
 
--- Toggle button
-local toggleBtn = Instance.new("TextButton", frame)
-toggleBtn.Name = "ToggleButton"
-toggleBtn.Size = UDim2.new(0, 30, 0, 30)
-toggleBtn.Position = UDim2.new(1, -36, 0, 6)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleBtn.Text = "−"
+-- === Top Bar ===
+local topBar = Instance.new("Frame", frame)
+topBar.Size = UDim2.new(1,0,0,25)
+topBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
+topBar.BorderSizePixel = 0
 
--- Green (Dupe Pet) button - looks like text
+local title = Instance.new("TextLabel", topBar)
+title.Size = UDim2.new(1,-25,1,0)
+title.Position = UDim2.new(0,5,0,0)
+title.BackgroundTransparency = 1
+title.Text = "SwiftHUB"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local closeBtn = Instance.new("TextButton", topBar)
+closeBtn.Size = UDim2.new(0,25,1,0)
+closeBtn.Position = UDim2.new(1,-25,0,0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+closeBtn.AutoButtonColor = true
+closeBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+end)
+
+-- === Buttons ===
 local dupeBtn = Instance.new("TextButton", frame)
-dupeBtn.Name = "DupePetButton"
-dupeBtn.Size = UDim2.new(1, -12, 0, 36)
-dupeBtn.Position = UDim2.new(0, 6, 0, 40)
-dupeBtn.BackgroundTransparency = 1
+dupeBtn.Size = UDim2.new(0.9,0,0,30)
+dupeBtn.Position = UDim2.new(0.05,0,0,40)
+dupeBtn.BackgroundColor3 = Color3.fromRGB(0,180,0)
 dupeBtn.Text = "Dupe Pet"
-dupeBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+dupeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 dupeBtn.Font = Enum.Font.GothamBold
-dupeBtn.TextScaled = true
+dupeBtn.TextSize = 16
+dupeBtn.AutoButtonColor = true
 
--- Red (Remove Dupe) button
 local removeBtn = Instance.new("TextButton", frame)
-removeBtn.Name = "RemoveDupeButton"
-removeBtn.Size = UDim2.new(1, -12, 0, 36)
-removeBtn.Position = UDim2.new(0, 6, 0, 86)
-removeBtn.BackgroundTransparency = 1
+removeBtn.Size = UDim2.new(0.9,0,0,30)
+removeBtn.Position = UDim2.new(0.05,0,0,80)
+removeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 removeBtn.Text = "Remove Dupe"
-removeBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+removeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 removeBtn.Font = Enum.Font.GothamBold
-removeBtn.TextScaled = true
+removeBtn.TextSize = 16
+removeBtn.AutoButtonColor = true
 
--- Status text and mini bar
+-- === Status Label + Mini Bar ===
 local statusLabel = Instance.new("TextLabel", frame)
-statusLabel.Name = "StatusLabel"
-statusLabel.Size = UDim2.new(1, -12, 0, 28)
-statusLabel.Position = UDim2.new(0, 6, 0, 134)
+statusLabel.Size = UDim2.new(0.9,0,0,25)
+statusLabel.Position = UDim2.new(0.05,0,0,120)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = ""
 statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
 statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextScaled = true
+statusLabel.TextSize = 14
 statusLabel.Visible = false
 
 local miniBar = Instance.new("Frame", frame)
-miniBar.Name = "MiniBar"
-miniBar.Size = UDim2.new(1, -12, 0, 12)
-miniBar.Position = UDim2.new(0, 6, 1, -18)
-miniBar.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+miniBar.Size = UDim2.new(0.9,0,0,10)
+miniBar.Position = UDim2.new(0.05,0,0,150)
+miniBar.BackgroundColor3 = Color3.fromRGB(60,60,60)
 miniBar.Visible = false
-miniBar.BorderSizePixel = 0
 
 local fill = Instance.new("Frame", miniBar)
-fill.Name = "Fill"
-fill.Size = UDim2.new(0, 0, 1, 0)
-fill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-fill.BorderSizePixel = 0
+fill.Size = UDim2.new(0,0,1,0)
+fill.BackgroundColor3 = Color3.fromRGB(255,255,255)
 
--- debug marker (temporary): uncomment if you want a large on-screen test
--- local dbg = Instance.new("TextLabel", screenGui); dbg.Size = UDim2.new(0.2,0,0.06,0); dbg.Position = UDim2.new(0.4,0,0.1,0); dbg.Text = "SwiftHUB LOADED"; dbg.TextScaled = true
-
--- Loading tween (10s)
-local loadingTween = TweenService:Create(barFill, TweenInfo.new(10, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
-loadingTween:Play()
-
--- animate loading text dots
-spawn(function()
-    while loadingFrame.Parent do
-        for i = 1,3 do
-            loadingLabel.Text = "Loading" .. string.rep(".", i)
-            wait(0.5)
-        end
-    end
-end)
-
-loadingTween.Completed:Connect(function()
-    print("SwiftHUB: loading finished")
-    loadingFrame:Destroy()
-    frame.Visible = true
-end)
-
--- === Drag implementation (manual) ===
-local dragging = false
-local dragInput, dragStart, startPos
-local function dragUpdate(input)
-    local delta = input.Position - dragStart
-    frame.Position = UDim2.new(
-        startPos.X.Scale, startPos.X.Offset + delta.X,
-        startPos.Y.Scale, startPos.Y.Offset + delta.Y
-    )
-end
-
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-frame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        dragUpdate(input)
-    end
-end)
-
--- collapse/expand
-local collapsed = false
-local fullSize = frame.Size
-local collapsedSize = UDim2.new(0, 44, 0, 44)
-toggleBtn.MouseButton1Click:Connect(function()
-    if collapsed then
-        frame:TweenSize(fullSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true)
-        toggleBtn.Text = "−"
-    else
-        frame:TweenSize(collapsedSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.25, true)
-        toggleBtn.Text = "+"
-    end
-    collapsed = not collapsed
-end)
-
--- busy guard so both buttons can't run concurrently
-local busy = false
-
--- Helper: play a progress tween for `duration` seconds on `fill` frame
-local function playProgress(duration)
-    fill.Size = UDim2.new(0,0,1,0)
+-- Helper: progress bar
+local function runProgress(duration)
     miniBar.Visible = true
-    local t = TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
-    t:Play()
-    local done = false
-    t.Completed:Connect(function() done = true end)
-    while not done do task.wait(0.05) end
-    return
+    fill.Size = UDim2.new(0,0,1,0)
+    local tween = TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
+    tween:Play()
+    tween.Completed:Wait()
+    miniBar.Visible = false
 end
 
--- === Red: Remove Dupe ===
-removeBtn.MouseButton1Click:Connect(function()
-    if busy then return end
-    busy = true
-    removeBtn.Visible = false
-    statusLabel.Visible = true
-    statusLabel.Text = "Scanning for dupe pets in your inventory..."
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    print("SwiftHUB: RemoveDupe - scanning")
-
-    task.wait(5)
-
-    statusLabel.Text = "Dupe pet found"
-    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-    print("SwiftHUB: RemoveDupe - found")
-
-    task.wait(1)
-
-    statusLabel.Text = "Changing pet UUID..."
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    print("SwiftHUB: RemoveDupe - changing UUID")
-
-    playProgress(10) -- 10s progress bar
-
-    statusLabel.Text = "Dupe removed!"
-    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-    print("SwiftHUB: RemoveDupe - removed")
-
-    task.wait(2)
-
-    statusLabel.Visible = false
-    miniBar.Visible = false
-    removeBtn.Visible = true
-    busy = false
-end)
-
--- === Green: Dupe Pet ===
+-- === Dupe Pet sequence ===
 dupeBtn.MouseButton1Click:Connect(function()
-    if busy then return end
-    busy = true
     dupeBtn.Visible = false
     statusLabel.Visible = true
-    statusLabel.Text = "Duplicating pet..."
     statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    print("SwiftHUB: DupePet - duplicating")
-
-    playProgress(10) -- duplicating bar
+    statusLabel.Text = "Duplicating pet..."
+    runProgress(10)
 
     statusLabel.Text = "Changing pet UUID..."
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    print("SwiftHUB: DupePet - changing UUID")
-
-    playProgress(10) -- second bar
+    runProgress(10)
 
     statusLabel.Text = "Pet Duplicated!"
     statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-    print("SwiftHUB: DupePet - done")
-
-    task.wait(2)
+    wait(2)
 
     statusLabel.Visible = false
-    miniBar.Visible = false
     dupeBtn.Visible = true
-    busy = false
 end)
 
-print("SwiftHUB: setup complete")
+-- === Remove Dupe sequence ===
+removeBtn.MouseButton1Click:Connect(function()
+    removeBtn.Visible = false
+    statusLabel.Visible = true
+    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    statusLabel.Text = "Scanning for dupe pets in your inventory..."
+    wait(5)
+
+    statusLabel.Text = "Dupe pet found"
+    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
+    wait(1)
+
+    statusLabel.Text = "Changing pet UUID..."
+    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    runProgress(10)
+
+    statusLabel.Text = "Dupe Removed!"
+    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
+    wait(2)
+
+    statusLabel.Visible = false
+    removeBtn.Visible = true
+end)
+]])()
