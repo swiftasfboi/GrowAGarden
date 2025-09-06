@@ -1,29 +1,71 @@
--- SwiftHUB Executor GUI
+-- SwiftHUB Loader + Main GUI
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Make ScreenGui
+-- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "SwiftHUB"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Make main frame
+-- === Loading Screen ===
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Name = "LoadingFrame"
+loadingFrame.Size = UDim2.new(0, 300, 0, 120)
+loadingFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+loadingFrame.BackgroundTransparency = 0.3
+loadingFrame.Parent = screenGui
+
+local header = Instance.new("TextLabel")
+header.Size = UDim2.new(1,0,0.3,0)
+header.Position = UDim2.new(0,0,0,0)
+header.BackgroundTransparency = 1
+header.Text = "SwiftHUB"
+header.Font = Enum.Font.GothamBlack
+header.TextScaled = true
+header.TextColor3 = Color3.fromRGB(0,200,255)
+header.Parent = loadingFrame
+
+local loadingLabel = Instance.new("TextLabel")
+loadingLabel.Name = "LoadingLabel"
+loadingLabel.Size = UDim2.new(1,0,0.3,0)
+loadingLabel.Position = UDim2.new(0,0,0.35,0)
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.Text = "Loading..."
+loadingLabel.Font = Enum.Font.Gotham
+loadingLabel.TextScaled = true
+loadingLabel.TextColor3 = Color3.fromRGB(255,255,255)
+loadingLabel.Parent = loadingFrame
+
+local barFrame = Instance.new("Frame")
+barFrame.Name = "BarFrame"
+barFrame.Size = UDim2.new(0.8,0,0.15,0)
+barFrame.Position = UDim2.new(0.1,0,0.75,0)
+barFrame.BackgroundColor3 = Color3.fromRGB(80,80,80)
+barFrame.Parent = loadingFrame
+
+local barFill = Instance.new("Frame")
+barFill.Name = "Bar"
+barFill.Size = UDim2.new(0,0,1,0)
+barFill.BackgroundColor3 = Color3.fromRGB(255,255,255)
+barFill.Parent = barFrame
+
+-- === Main GUI (hidden until loading finishes) ===
 local frame = Instance.new("Frame")
 frame.Name = "ToolBar"
 frame.Size = UDim2.new(0, 200, 0, 150)
 frame.Position = UDim2.new(0.4, 0, 0.4, 0)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BackgroundTransparency = 0.2
+frame.Visible = false
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
 
--- Toggle button
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Name = "ToggleButton"
 toggleBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -32,7 +74,6 @@ toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 toggleBtn.Text = "−"
 toggleBtn.Parent = frame
 
--- Dupe Pet button
 local dupeBtn = Instance.new("TextButton")
 dupeBtn.Name = "DupePetButton"
 dupeBtn.Size = UDim2.new(1, -10, 0, 30)
@@ -44,7 +85,6 @@ dupeBtn.Font = Enum.Font.GothamBold
 dupeBtn.TextScaled = true
 dupeBtn.Parent = frame
 
--- Remove Dupe button
 local removeBtn = Instance.new("TextButton")
 removeBtn.Name = "RemoveDupeButton"
 removeBtn.Size = UDim2.new(1, -10, 0, 30)
@@ -56,7 +96,6 @@ removeBtn.Font = Enum.Font.GothamBold
 removeBtn.TextScaled = true
 removeBtn.Parent = frame
 
--- Status label
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Name = "StatusLabel"
 statusLabel.Size = UDim2.new(1, -10, 0, 30)
@@ -69,7 +108,6 @@ statusLabel.TextScaled = true
 statusLabel.Visible = false
 statusLabel.Parent = frame
 
--- Mini progress bar
 local miniBar = Instance.new("Frame")
 miniBar.Name = "MiniBar"
 miniBar.Size = UDim2.new(1, -10, 0, 10)
@@ -84,7 +122,26 @@ fill.Size = UDim2.new(0, 0, 1, 0)
 fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 fill.Parent = miniBar
 
--- Collapse/Expand toggle
+-- === Loading Animation ===
+local tweenInfo = TweenInfo.new(10, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local tween = TweenService:Create(barFill, tweenInfo, {Size = UDim2.new(1,0,1,0)})
+tween:Play()
+
+task.spawn(function()
+    while loadingFrame.Parent do
+        for i = 1,3 do
+            loadingLabel.Text = "Loading" .. string.rep(".", i)
+            task.wait(0.5)
+        end
+    end
+end)
+
+tween.Completed:Connect(function()
+    loadingFrame:Destroy()
+    frame.Visible = true
+end)
+
+-- === Collapse/Expand Toggle ===
 local collapsed = false
 local fullSize = frame.Size
 local collapsedSize = UDim2.new(0, 40, 0, 40)
@@ -100,7 +157,7 @@ toggleBtn.MouseButton1Click:Connect(function()
     collapsed = not collapsed
 end)
 
--- 🔴 Remove Dupe logic
+-- === 🔴 Remove Dupe logic ===
 removeBtn.MouseButton1Click:Connect(function()
     removeBtn.Visible = false
     statusLabel.Visible = true
@@ -130,7 +187,7 @@ removeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- 🟢 Dupe Pet logic
+-- === 🟢 Dupe Pet logic ===
 dupeBtn.MouseButton1Click:Connect(function()
     dupeBtn.Visible = false
     statusLabel.Visible = true
