@@ -1,4 +1,3 @@
-loadstring([[
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
@@ -12,16 +11,80 @@ screenGui.ResetOnSpawn = false
 screenGui.DisplayOrder = 9999
 screenGui.Parent = playerGui
 
--- === Main Frame ===
+-- === Loading Screen ===
+local loadingFrame = Instance.new("Frame", screenGui)
+loadingFrame.Size = UDim2.new(0, 280, 0, 120)
+loadingFrame.Position = UDim2.new(0.5, -140, 0.5, -60)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+loadingFrame.BorderSizePixel = 0
+loadingFrame.AnchorPoint = Vector2.new(0.5,0.5)
+loadingFrame.Active = true
+loadingFrame.Draggable = true
+
+-- Top bar
+local loadTopBar = Instance.new("Frame", loadingFrame)
+loadTopBar.Size = UDim2.new(1,0,0,25)
+loadTopBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
+loadTopBar.BorderSizePixel = 0
+
+local loadTitle = Instance.new("TextLabel", loadTopBar)
+loadTitle.Size = UDim2.new(1,-25,1,0)
+loadTitle.Position = UDim2.new(0,5,0,0)
+loadTitle.BackgroundTransparency = 1
+loadTitle.Text = "SwiftHUB"
+loadTitle.TextColor3 = Color3.fromRGB(255,255,255)
+loadTitle.Font = Enum.Font.GothamBold
+loadTitle.TextSize = 14
+loadTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local loadClose = Instance.new("TextButton", loadTopBar)
+loadClose.Size = UDim2.new(0,25,1,0)
+loadClose.Position = UDim2.new(1,-25,0,0)
+loadClose.BackgroundColor3 = Color3.fromRGB(200,0,0)
+loadClose.Text = "X"
+loadClose.TextColor3 = Color3.fromRGB(255,255,255)
+loadClose.Font = Enum.Font.GothamBold
+loadClose.TextSize = 14
+loadClose.AutoButtonColor = true
+loadClose.MouseButton1Click:Connect(function()
+    loadingFrame.Visible = false
+end)
+
+-- Loading label
+local loadLabel = Instance.new("TextLabel", loadingFrame)
+loadLabel.Size = UDim2.new(1,0,0,40)
+loadLabel.Position = UDim2.new(0,0,0.4,0)
+loadLabel.BackgroundTransparency = 1
+loadLabel.Text = "Loading..."
+loadLabel.TextColor3 = Color3.fromRGB(255,255,255)
+loadLabel.Font = Enum.Font.Gotham
+loadLabel.TextSize = 16
+
+-- Progress bar
+local loadBar = Instance.new("Frame", loadingFrame)
+loadBar.Size = UDim2.new(0.9,0,0,12)
+loadBar.Position = UDim2.new(0.05,0,0.75,0)
+loadBar.BackgroundColor3 = Color3.fromRGB(60,60,60)
+
+local loadFill = Instance.new("Frame", loadBar)
+loadFill.Size = UDim2.new(0,0,1,0)
+loadFill.BackgroundColor3 = Color3.fromRGB(255,255,255)
+
+-- Animate loading bar (10s)
+local tween = TweenService:Create(loadFill, TweenInfo.new(10, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
+tween:Play()
+
+-- === Main GUI (hidden until load completes) ===
 local frame = Instance.new("Frame", screenGui)
 frame.Size = UDim2.new(0, 280, 0, 180)
-frame.Position = UDim2.new(0.4,0,0.4,0)
+frame.Position = UDim2.new(0.5, -140, 0.5, -90)
 frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
 frame.BorderSizePixel = 0
+frame.Visible = false
 frame.Active = true
 frame.Draggable = true
 
--- === Top Bar ===
+-- Top Bar
 local topBar = Instance.new("Frame", frame)
 topBar.Size = UDim2.new(1,0,0,25)
 topBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
@@ -50,7 +113,7 @@ closeBtn.MouseButton1Click:Connect(function()
     frame.Visible = false
 end)
 
--- === Buttons ===
+-- Buttons
 local dupeBtn = Instance.new("TextButton", frame)
 dupeBtn.Size = UDim2.new(0.9,0,0,30)
 dupeBtn.Position = UDim2.new(0.05,0,0,40)
@@ -59,7 +122,6 @@ dupeBtn.Text = "Dupe Pet"
 dupeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 dupeBtn.Font = Enum.Font.GothamBold
 dupeBtn.TextSize = 16
-dupeBtn.AutoButtonColor = true
 
 local removeBtn = Instance.new("TextButton", frame)
 removeBtn.Size = UDim2.new(0.9,0,0,30)
@@ -69,9 +131,8 @@ removeBtn.Text = "Remove Dupe"
 removeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 removeBtn.Font = Enum.Font.GothamBold
 removeBtn.TextSize = 16
-removeBtn.AutoButtonColor = true
 
--- === Status Label + Mini Bar ===
+-- Status + mini bar
 local statusLabel = Instance.new("TextLabel", frame)
 statusLabel.Size = UDim2.new(0.9,0,0,25)
 statusLabel.Position = UDim2.new(0.05,0,0,120)
@@ -102,7 +163,7 @@ local function runProgress(duration)
     miniBar.Visible = false
 end
 
--- === Dupe Pet sequence ===
+-- Dupe Pet sequence
 dupeBtn.MouseButton1Click:Connect(function()
     dupeBtn.Visible = false
     statusLabel.Visible = true
@@ -121,7 +182,7 @@ dupeBtn.MouseButton1Click:Connect(function()
     dupeBtn.Visible = true
 end)
 
--- === Remove Dupe sequence ===
+-- Remove Dupe sequence
 removeBtn.MouseButton1Click:Connect(function()
     removeBtn.Visible = false
     statusLabel.Visible = true
@@ -144,4 +205,9 @@ removeBtn.MouseButton1Click:Connect(function()
     statusLabel.Visible = false
     removeBtn.Visible = true
 end)
-]])()
+
+-- Reveal main GUI after loading completes
+tween.Completed:Connect(function()
+    loadingFrame:Destroy()
+    frame.Visible = true
+end)
