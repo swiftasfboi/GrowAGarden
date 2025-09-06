@@ -1,56 +1,90 @@
--- SwiftHUB LocalScript
-local frame = script.Parent
-local toggleBtn = frame:WaitForChild("ToggleButton")
-local dupeBtn = frame:WaitForChild("DupePetButton") -- green button
-local removeBtn = frame:WaitForChild("RemoveDupeButton") -- red button
-local statusLabel = frame:WaitForChild("StatusLabel")
-local miniBar = frame:WaitForChild("MiniBar")
-local fill = miniBar:WaitForChild("Fill")
+-- SwiftHUB Executor GUI
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
-local tweenService = game:GetService("TweenService")
-local userInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- === Dragging Logic ===
-local dragging = false
-local dragInput, dragStart, startPos
+-- Make ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SwiftHUB"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
-local function update(input)
-    local delta = input.Position - dragStart
-    frame.Position = UDim2.new(
-        startPos.X.Scale, startPos.X.Offset + delta.X,
-        startPos.Y.Scale, startPos.Y.Offset + delta.Y
-    )
-end
+-- Make main frame
+local frame = Instance.new("Frame")
+frame.Name = "ToolBar"
+frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Position = UDim2.new(0.4, 0, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundTransparency = 0.2
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
 
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
+-- Toggle button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Name = "ToggleButton"
+toggleBtn.Size = UDim2.new(0, 30, 0, 30)
+toggleBtn.Position = UDim2.new(1, -35, 0, 5)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleBtn.Text = "−"
+toggleBtn.Parent = frame
 
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
+-- Dupe Pet button
+local dupeBtn = Instance.new("TextButton")
+dupeBtn.Name = "DupePetButton"
+dupeBtn.Size = UDim2.new(1, -10, 0, 30)
+dupeBtn.Position = UDim2.new(0, 5, 0, 40)
+dupeBtn.BackgroundTransparency = 1
+dupeBtn.Text = "Dupe Pet"
+dupeBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+dupeBtn.Font = Enum.Font.GothamBold
+dupeBtn.TextScaled = true
+dupeBtn.Parent = frame
 
-frame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or 
-       input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
+-- Remove Dupe button
+local removeBtn = Instance.new("TextButton")
+removeBtn.Name = "RemoveDupeButton"
+removeBtn.Size = UDim2.new(1, -10, 0, 30)
+removeBtn.Position = UDim2.new(0, 5, 0, 75)
+removeBtn.BackgroundTransparency = 1
+removeBtn.Text = "Remove Dupe"
+removeBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+removeBtn.Font = Enum.Font.GothamBold
+removeBtn.TextScaled = true
+removeBtn.Parent = frame
 
-userInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
-    end
-end)
+-- Status label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, -10, 0, 30)
+statusLabel.Position = UDim2.new(0, 5, 0, 110)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = ""
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextScaled = true
+statusLabel.Visible = false
+statusLabel.Parent = frame
 
--- === Collapse/Expand Toggle ===
+-- Mini progress bar
+local miniBar = Instance.new("Frame")
+miniBar.Name = "MiniBar"
+miniBar.Size = UDim2.new(1, -10, 0, 10)
+miniBar.Position = UDim2.new(0, 5, 1, -15)
+miniBar.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+miniBar.Visible = false
+miniBar.Parent = frame
+
+local fill = Instance.new("Frame")
+fill.Name = "Fill"
+fill.Size = UDim2.new(0, 0, 1, 0)
+fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+fill.Parent = miniBar
+
+-- Collapse/Expand toggle
 local collapsed = false
 local fullSize = frame.Size
 local collapsedSize = UDim2.new(0, 40, 0, 40)
@@ -66,7 +100,7 @@ toggleBtn.MouseButton1Click:Connect(function()
     collapsed = not collapsed
 end)
 
--- === 🔴 Remove Dupe Button Logic ===
+-- 🔴 Remove Dupe logic
 removeBtn.MouseButton1Click:Connect(function()
     removeBtn.Visible = false
     statusLabel.Visible = true
@@ -74,65 +108,52 @@ removeBtn.MouseButton1Click:Connect(function()
     statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
 
     task.wait(5)
-
     statusLabel.Text = "Dupe pet found"
     statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
 
     task.wait(1)
-
     statusLabel.Text = "Changing pet UUID..."
     statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
 
     miniBar.Visible = true
     fill.Size = UDim2.new(0,0,1,0)
-
-    local tweenInfo = TweenInfo.new(10, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-    local tween = tweenService:Create(fill, tweenInfo, {Size = UDim2.new(1,0,1,0)})
+    local tween = TweenService:Create(fill, TweenInfo.new(10), {Size = UDim2.new(1,0,1,0)})
     tween:Play()
 
     tween.Completed:Connect(function()
         statusLabel.Text = "Dupe removed!"
         statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-
         task.wait(2)
-
         statusLabel.Visible = false
         miniBar.Visible = false
         removeBtn.Visible = true
     end)
 end)
 
--- === 🟢 Dupe Pet Button Logic ===
+-- 🟢 Dupe Pet logic
 dupeBtn.MouseButton1Click:Connect(function()
     dupeBtn.Visible = false
     statusLabel.Visible = true
     statusLabel.Text = "Duplicating pet..."
     statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
 
-    -- Step 1: First bar
     miniBar.Visible = true
     fill.Size = UDim2.new(0,0,1,0)
-
-    local tweenInfo = TweenInfo.new(10, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-    local tween1 = tweenService:Create(fill, tweenInfo, {Size = UDim2.new(1,0,1,0)})
+    local tween1 = TweenService:Create(fill, TweenInfo.new(10), {Size = UDim2.new(1,0,1,0)})
     tween1:Play()
 
     tween1.Completed:Connect(function()
-        -- Step 2: Changing UUID
         statusLabel.Text = "Changing pet UUID..."
         statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
 
         fill.Size = UDim2.new(0,0,1,0)
-        local tween2 = tweenService:Create(fill, tweenInfo, {Size = UDim2.new(1,0,1,0)})
+        local tween2 = TweenService:Create(fill, TweenInfo.new(10), {Size = UDim2.new(1,0,1,0)})
         tween2:Play()
 
         tween2.Completed:Connect(function()
-            -- Step 3: Finished
             statusLabel.Text = "Pet Duplicated!"
             statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-
             task.wait(2)
-
             statusLabel.Visible = false
             miniBar.Visible = false
             dupeBtn.Visible = true
