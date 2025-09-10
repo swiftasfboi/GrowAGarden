@@ -1,5 +1,7 @@
+-- SwiftHUB - Hatch UI (resets after success)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local playerGui = player:WaitForChild("PlayerGui")
@@ -18,39 +20,7 @@ loadingFrame.Position = UDim2.new(0.5, -140, 0.5, -60)
 loadingFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
 loadingFrame.BorderSizePixel = 0
 loadingFrame.AnchorPoint = Vector2.new(0.5,0.5)
-loadingFrame.Active = true
-loadingFrame.Draggable = true
 
--- Top bar
-local loadTopBar = Instance.new("Frame", loadingFrame)
-loadTopBar.Size = UDim2.new(1,0,0,25)
-loadTopBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
-loadTopBar.BorderSizePixel = 0
-
-local loadTitle = Instance.new("TextLabel", loadTopBar)
-loadTitle.Size = UDim2.new(1,-25,1,0)
-loadTitle.Position = UDim2.new(0,5,0,0)
-loadTitle.BackgroundTransparency = 1
-loadTitle.Text = "SwiftHUB"
-loadTitle.TextColor3 = Color3.fromRGB(255,255,255)
-loadTitle.Font = Enum.Font.GothamBold
-loadTitle.TextSize = 14
-loadTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local loadClose = Instance.new("TextButton", loadTopBar)
-loadClose.Size = UDim2.new(0,25,1,0)
-loadClose.Position = UDim2.new(1,-25,0,0)
-loadClose.BackgroundColor3 = Color3.fromRGB(200,0,0)
-loadClose.Text = "X"
-loadClose.TextColor3 = Color3.fromRGB(255,255,255)
-loadClose.Font = Enum.Font.GothamBold
-loadClose.TextSize = 14
-loadClose.AutoButtonColor = true
-loadClose.MouseButton1Click:Connect(function()
-    loadingFrame.Visible = false
-end)
-
--- Loading label
 local loadLabel = Instance.new("TextLabel", loadingFrame)
 loadLabel.Size = UDim2.new(1,0,0,40)
 loadLabel.Position = UDim2.new(0,0,0.4,0)
@@ -59,25 +29,27 @@ loadLabel.Text = "Loading..."
 loadLabel.TextColor3 = Color3.fromRGB(255,255,255)
 loadLabel.Font = Enum.Font.Gotham
 loadLabel.TextSize = 16
+loadLabel.TextScaled = true
 
--- Progress bar
 local loadBar = Instance.new("Frame", loadingFrame)
 loadBar.Size = UDim2.new(0.9,0,0,12)
 loadBar.Position = UDim2.new(0.05,0,0.75,0)
 loadBar.BackgroundColor3 = Color3.fromRGB(60,60,60)
+loadBar.BorderSizePixel = 0
 
 local loadFill = Instance.new("Frame", loadBar)
 loadFill.Size = UDim2.new(0,0,1,0)
 loadFill.BackgroundColor3 = Color3.fromRGB(255,255,255)
+loadFill.BorderSizePixel = 0
 
 -- Animate loading bar (10s)
-local tween = TweenService:Create(loadFill, TweenInfo.new(10, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
-tween:Play()
+local loadingTween = TweenService:Create(loadFill, TweenInfo.new(10, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
+loadingTween:Play()
 
 -- === Main GUI (hidden until load completes) ===
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 280, 0, 180)
-frame.Position = UDim2.new(0.5, -140, 0.5, -90)
+frame.Size = UDim2.new(0, 320, 0, 240)
+frame.Position = UDim2.new(0.5, -160, 0.5, -120)
 frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
 frame.BorderSizePixel = 0
 frame.Visible = false
@@ -86,128 +58,183 @@ frame.Draggable = true
 
 -- Top Bar
 local topBar = Instance.new("Frame", frame)
-topBar.Size = UDim2.new(1,0,0,25)
+topBar.Size = UDim2.new(1,0,0,28)
 topBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
 topBar.BorderSizePixel = 0
 
 local title = Instance.new("TextLabel", topBar)
-title.Size = UDim2.new(1,-25,1,0)
-title.Position = UDim2.new(0,5,0,0)
+title.Size = UDim2.new(1,-30,1,0)
+title.Position = UDim2.new(0,8,0,0)
 title.BackgroundTransparency = 1
 title.Text = "SwiftHUB"
 title.TextColor3 = Color3.fromRGB(255,255,255)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 14
+title.TextSize = 16
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local closeBtn = Instance.new("TextButton", topBar)
-closeBtn.Size = UDim2.new(0,25,1,0)
-closeBtn.Position = UDim2.new(1,-25,0,0)
+closeBtn.Size = UDim2.new(0,26,1,0)
+closeBtn.Position = UDim2.new(1,-30,0,1)
 closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 14
-closeBtn.AutoButtonColor = true
 closeBtn.MouseButton1Click:Connect(function()
     frame.Visible = false
 end)
 
--- Buttons
-local dupeBtn = Instance.new("TextButton", frame)
-dupeBtn.Size = UDim2.new(0.9,0,0,30)
-dupeBtn.Position = UDim2.new(0.05,0,0,40)
-dupeBtn.BackgroundColor3 = Color3.fromRGB(0,180,0)
-dupeBtn.Text = "Dupe Pet"
-dupeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-dupeBtn.Font = Enum.Font.GothamBold
-dupeBtn.TextSize = 16
+-- Header
+local header = Instance.new("TextLabel", frame)
+header.Size = UDim2.new(1,0,0,28)
+header.Position = UDim2.new(0,0,0,32)
+header.BackgroundTransparency = 1
+header.Text = "Auto Hatch"
+header.TextColor3 = Color3.fromRGB(255,255,255)
+header.Font = Enum.Font.GothamBold
+header.TextSize = 16
 
-local removeBtn = Instance.new("TextButton", frame)
-removeBtn.Size = UDim2.new(0.9,0,0,30)
-removeBtn.Position = UDim2.new(0.05,0,0,80)
-removeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-removeBtn.Text = "Remove Dupe"
-removeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-removeBtn.Font = Enum.Font.GothamBold
-removeBtn.TextSize = 16
+-- content area
+local contentFrame = Instance.new("Frame", frame)
+contentFrame.Name = "Content"
+contentFrame.Size = UDim2.new(0.9,0,0,130)
+contentFrame.Position = UDim2.new(0.05,0,0,70)
+contentFrame.BackgroundTransparency = 1
 
--- Status + mini bar
-local statusLabel = Instance.new("TextLabel", frame)
-statusLabel.Size = UDim2.new(0.9,0,0,25)
-statusLabel.Position = UDim2.new(0.05,0,0,120)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = ""
-statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 14
-statusLabel.Visible = false
-
-local miniBar = Instance.new("Frame", frame)
-miniBar.Size = UDim2.new(0.9,0,0,10)
-miniBar.Position = UDim2.new(0.05,0,0,150)
-miniBar.BackgroundColor3 = Color3.fromRGB(60,60,60)
-miniBar.Visible = false
-
-local fill = Instance.new("Frame", miniBar)
-fill.Size = UDim2.new(0,0,1,0)
-fill.BackgroundColor3 = Color3.fromRGB(255,255,255)
-
--- Helper: progress bar
-local function runProgress(duration)
-    miniBar.Visible = true
-    fill.Size = UDim2.new(0,0,1,0)
-    local tween = TweenService:Create(fill, TweenInfo.new(duration, Enum.EasingStyle.Linear), {Size = UDim2.new(1,0,1,0)})
-    tween:Play()
-    tween.Completed:Wait()
-    miniBar.Visible = false
+-- Helper: clear contentFrame children
+local function clearContent()
+    for _, c in ipairs(contentFrame:GetChildren()) do
+        c:Destroy()
+    end
 end
 
--- Dupe Pet sequence
-dupeBtn.MouseButton1Click:Connect(function()
-    dupeBtn.Visible = false
-    statusLabel.Visible = true
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    statusLabel.Text = "Duplicating pet..."
-    runProgress(10)
+-- Uneven progress function
+local function playUnevenProgress(parentFrame, duration)
+    local bar = Instance.new("Frame", parentFrame)
+    bar.Size = UDim2.new(1,0,0,18)
+    bar.Position = UDim2.new(0,0,0,0)
+    bar.BackgroundColor3 = Color3.fromRGB(60,60,60)
 
-    statusLabel.Text = "Changing pet UUID..."
-    runProgress(10)
+    local fill = Instance.new("Frame", bar)
+    fill.Size = UDim2.new(0,0,1,0)
+    fill.BackgroundColor3 = Color3.fromRGB(0,200,120)
 
-    statusLabel.Text = "Pet Duplicated!"
-    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-    wait(2)
+    local start = tick()
+    local prev = 0
+    local freq = 2.5 + math.random()*2.5
+    local amp = 0.12
+    local conn
+    conn = RunService.RenderStepped:Connect(function()
+        local elapsed = tick() - start
+        local alpha = math.clamp(elapsed / duration, 0, 1)
+        local jitter = math.sin(elapsed * freq) * amp * (1 - alpha)
+        local display = math.clamp(alpha + jitter, prev, 1)
+        prev = display
+        fill.Size = UDim2.new(display, 0, 1, 0)
+        if alpha >= 1 then
+            fill.Size = UDim2.new(1,0,1,0)
+            conn:Disconnect()
+        end
+    end)
 
-    statusLabel.Visible = false
-    dupeBtn.Visible = true
-end)
+    task.wait(duration + 0.1)
+    bar:Destroy()
+end
 
--- Remove Dupe sequence
-removeBtn.MouseButton1Click:Connect(function()
-    removeBtn.Visible = false
-    statusLabel.Visible = true
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    statusLabel.Text = "Scanning for dupe pets in your inventory..."
-    wait(5)
+-- Function to create inputs + button
+local function createInputs()
+    clearContent()
 
-    statusLabel.Text = "Dupe pet found"
-    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-    wait(1)
+    local eggBox = Instance.new("TextBox", contentFrame)
+    eggBox.Size = UDim2.new(1,0,0,30)
+    eggBox.Position = UDim2.new(0,0,0,0)
+    eggBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    eggBox.Text = ""
+    eggBox.PlaceholderText = "Enter egg name..."
+    eggBox.TextColor3 = Color3.fromRGB(255,255,255)
+    eggBox.Font = Enum.Font.Gotham
+    eggBox.TextSize = 14
+    eggBox.ClearTextOnFocus = false
 
-    statusLabel.Text = "Changing pet UUID..."
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    runProgress(10)
+    local petBox = Instance.new("TextBox", contentFrame)
+    petBox.Size = UDim2.new(1,0,0,30)
+    petBox.Position = UDim2.new(0,0,0,40)
+    petBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    petBox.Text = ""
+    petBox.PlaceholderText = "Enter pet name..."
+    petBox.TextColor3 = Color3.fromRGB(255,255,255)
+    petBox.Font = Enum.Font.Gotham
+    petBox.TextSize = 14
+    petBox.ClearTextOnFocus = false
 
-    statusLabel.Text = "Dupe Removed!"
-    statusLabel.TextColor3 = Color3.fromRGB(0,255,0)
-    wait(2)
+    local hatchBtn = Instance.new("TextButton", contentFrame)
+    hatchBtn.Size = UDim2.new(1,0,0,34)
+    hatchBtn.Position = UDim2.new(0,0,0,84)
+    hatchBtn.BackgroundColor3 = Color3.fromRGB(0,180,0)
+    hatchBtn.Text = "Hatch"
+    hatchBtn.TextColor3 = Color3.fromRGB(255,255,255)
+    hatchBtn.Font = Enum.Font.GothamBold
+    hatchBtn.TextSize = 16
 
-    statusLabel.Visible = false
-    removeBtn.Visible = true
-end)
+    hatchBtn.MouseButton1Click:Connect(function()
+        local egg = eggBox.Text or ""
+        local pet = petBox.Text or ""
+        if egg:match("^%s*$") or pet:match("^%s*$") then
+            local warn = Instance.new("TextLabel", contentFrame)
+            warn.Size = UDim2.new(1,0,0,24)
+            warn.Position = UDim2.new(0,0,0,120)
+            warn.BackgroundTransparency = 1
+            warn.Text = "Please enter both egg and pet name."
+            warn.TextColor3 = Color3.fromRGB(255,200,0)
+            warn.Font = Enum.Font.Gotham
+            warn.TextSize = 14
+            task.delay(2, function() if warn.Parent then warn:Destroy() end end)
+            return
+        end
+
+        clearContent()
+
+        local area = Instance.new("Frame", contentFrame)
+        area.Size = UDim2.new(1,0,1,0)
+        area.BackgroundTransparency = 1
+
+        local status = Instance.new("TextLabel", area)
+        status.Size = UDim2.new(1,0,0,26)
+        status.Position = UDim2.new(0,0,0,28)
+        status.BackgroundTransparency = 1
+        status.Text = "Hatching pet..."
+        status.TextColor3 = Color3.fromRGB(255,255,255)
+        status.Font = Enum.Font.Gotham
+        status.TextSize = 14
+
+        playUnevenProgress(area, 10)
+
+        area:Destroy()
+
+        local success = Instance.new("TextLabel", contentFrame)
+        success.Size = UDim2.new(1,0,0,44)
+        success.Position = UDim2.new(0,0,0,20)
+        success.BackgroundTransparency = 1
+        success.Text = 'Successfully Hatched "'..pet..'" from "'..egg..'"'
+        success.TextColor3 = Color3.fromRGB(0,255,0)
+        success.Font = Enum.Font.GothamBold
+        success.TextSize = 14
+        success.TextWrapped = true
+
+        task.delay(3, function()
+            if success.Parent then
+                success:Destroy()
+                createInputs()
+            end
+        end)
+    end)
+end
+
+-- Start with inputs
+createInputs()
 
 -- Reveal main GUI after loading completes
-tween.Completed:Connect(function()
+loadingTween.Completed:Connect(function()
     loadingFrame:Destroy()
     frame.Visible = true
 end)
